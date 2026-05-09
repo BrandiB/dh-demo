@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"></head>
+<head><meta charset="UTF-8">
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-<body>
-
 <style>
+body {
+	background-color: ##5E9E2;
+}
+
 #footer {
 	width: 90%;
 	margin: 10px auto;
@@ -14,13 +16,32 @@
 	text-align: center;
 }
 
+#intro {
+	padding: 5px;
+	font-family: monospace;
+	font-size: 120%;
+	text-align: justify;
+	background-color: white;
+}
+
 #leftSide {
 	width: 50%;
 	float: left;
-	margin-right: 10px;
-	margin-top: 5px;
-	border-radius: 5px;
-	border: 1px solid black;
+}
+
+#leftSideBorder {
+	margin-right: 5px;
+}
+
+@media screen and (max-width: 800px) {
+  #leftSide {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  #leftSideBorder {
+	margin-right: 0px;
+  }
 }
 
 #originalXML {
@@ -32,11 +53,14 @@
 	background-color: #eee;
 }
 
-#poemDetails {
-	width: 95%;
-	margin: 5px auto;
-	padding: 0px;
-	overflow: hidden;
+.photoCaption {
+	text-align: center;
+}
+
+#poemDetails:after {
+  content: "";
+  display: table;
+  clear: both;
 }
 
 #projectTitle {
@@ -47,23 +71,44 @@
 	font-size: 200%;
 	font-family: monospace;
 	text-align: center;
+	color: #773344;
 }
 
 .rhyme-a {
-	color: blue;
+	color: #D44D5C;
 	font-weight: bold;
 }
 
 .rhyme-b {
-	color: orange;
+	color: #4e5ed4;
+	font-style: italic;
 	font-weight: bold;
 }
 
 #rightSide {
 	float: left;
-	margin-top: 5px;
-	border-radius: 5px;
-	border: 1px solid black;
+	width: 50%;
+}
+
+#rightSideBorder {
+	background-color: #f6e7e1;
+	border-radius: 10px;
+	border: 1px solid #E3B5A4;
+	margin-left: 5px;
+}
+
+@media screen and (max-width: 800px) {
+  #rightSide {
+    width: 100%;
+    margin-top: 5px;
+  }
+  
+  #rightSideBorder {
+  	background-color: #f6e7e1;
+	border-radius: 0px;
+	border: 1px solid #E3B5A4;
+	margin-left: 0px;
+  }
 }
 
 rt {
@@ -78,6 +123,14 @@ rt {
 	font-size: 90%;
 }
 
+#theAuthor {
+	margin-left: 5px;
+	font-family: monospace;
+	font-size: 150%;
+	padding: 0px 15px;
+	color: #773344;
+}
+
 #theDict, #theGraphs {
 	width: 90%;
 	display: block;
@@ -90,6 +143,13 @@ rt {
 	padding: 15px;
 	font-size: 150%;
 	font-family: monospace;	
+}
+
+#thePoemSource {
+	margin-left: 5px;
+	font-family: "Book Antiqua";	
+	font-style: italic;
+	padding: 0px 15px;
 }
 
 #theSelections {
@@ -108,6 +168,21 @@ rt {
 	font-size: 150%;
 	font-weight: bold;
 	font-family: "Book Antiqua";
+	color: #773344;
+}
+
+#turtlePhoto, #turtlePic {
+	width: 90%;
+	display: block;
+	margin: 10px auto;
+	font-size: 80%;
+	font-style: italic;
+	text-align: center;
+}
+
+#turtlePhoto {
+	border: 3px double #888;
+	border-radius: 5px;
 }
 
 .wordHeader {
@@ -115,10 +190,10 @@ rt {
 	font-size: 110%;
 }
 </style>
+</head>
 
+<body>
 <div id="projectTitle">Digital Humanities Demo: The Turtle</div>
-
-
 
 <div id="theSelections">
 	<input type="checkbox" id="v1" name="v1" checked onChange="displayPoem(xmlDoc)">
@@ -134,37 +209,60 @@ rt {
 </div>
 
 <div id="poemDetails">
-<div id="leftSide">
-<div id="theTitle"></div>
-<div id="thePoem"></div>
-<div id="theSource"></div>
-</div>
-<div id="rightSide">
-<div id="theDict">
-	<h3>Dictionary</h3>
-	<h4>Hover over a word to view its definition.</h4>
-	<div id="dictEntry">
-		<span class='wordHeader'>&nbsp;</span><br />
-		<span class='speechPart'>&nbsp;</span> <br />
-		<span class='def'>&nbsp;</span>
-	</div>
-</div>
-<div id="theGraphs">
-	<h3>Data for Selected Verses</h3>
-	<h4>Total Words</h4>
-	<div id="wordCount"></div>
-	<h4>Words by Part of Speech</h4>
-	<div id="wordPartGraph"></div>
-	<h4>Nouns by Grammatical Gender</h4>
-	<div id="gramGender"></div>
-</div>
-</div>
+	<div id="leftSide"><div id="leftSideBorder">
+		<div id="theTitle"></div>
+		<div id="thePoem"></div>
+		<div id="theSource"></div>
+		<div id="turtlePic">
+			<img src="good-looking-turtle.jpg" id="turtlePhoto"><br />
+			July 2019, Aldabra Tortoise, St. Louis Zoo
+		</div>
+	</div></div>
+	<div id="rightSide"><div id="rightSideBorder">
+		<div id="theDict">
+			<h3>Dictionary</h3>
+			<h5>Click on a word in the poem to view its definition.</h5>
+			<div id="dictEntry">
+				<span class='wordHeader'>&nbsp;</span><br />
+				<span class='speechPart'>&nbsp;</span> <br />
+				<span class='def'>&nbsp;</span>
+			</div>
+		</div>
+		<div id="theGraphs">
+			<h3>Data for Selected Verses</h3>
+			<h4>Total Words</h4>
+			<div id="wordCount"></div>
+			<h4>Words by Part of Speech</h4>
+			<div id="wordPartGraph"></div>
+			<h4>Nouns by Grammatical Gender</h4>
+			<div id="gramGender"></div>
+		</div>
+	</div></div>
 </div>
 
 <hr> 
+<hr>
 
-<div id="intro">This demo consists of TEI-formatted XML data containing the public domain poem <i>Die Schildkröte</i> (<i>The Turtle</i>) by the German poet Christian Morgenstern.  The German compound word "Schildkröte" literally breaks apart into "shield-toad." The XML is parsed and displayed using JavaScript, and the visuals are generated using the d3 package for JavaScript.<br /><a href="https://encyclopaedia-fortuita.com/index.php/academic-papers/">My personal website contains papers on hypertext and digitizing and analyzing Samuel Johnson's dictionary.</a><br />
-<a href="">The code for this page is available at GitHub.</a>
+<div id="intro">
+	This demo consists of TEI-formatted XML data containing the public domain poem 
+	<i>Die Schildkröte</i> (<i>The Turtle</i>) by the German poet Christian Morgenstern.  
+	The German compound word "Schildkröte" literally breaks apart into "shield-toad." 
+	The XML is parsed and displayed using JavaScript and DOMParser, and the visuals are generated using 
+	the d3 package for JavaScript.<br />
+	- <i>Bran Besalke</i>, May 2026<br /><br />
+	<b>Other Sites of Interest</b><br />
+	<ul>
+		<li><a href="https://encyclopaedia-fortuita.com/index.php/academic-papers/">Personal Website</a> 
+			<ul>
+			<li> Academic papers on hypertext and digitizing and analyzing Samuel Johnson's dictionary.</li>
+			</ul>
+		</li>
+		<li><a href="https://github.com/BrandiB/dh-demo">GitHub</a>
+			<ul>
+			<li>The code for this page is available here.</li>
+			</ul>
+		</li>
+	</ul>
 </div>
 <hr>
 
@@ -329,7 +427,7 @@ rt {
 ]
 </pre>
 </div>
-<div id="footer"><em>NO</em> AI used in the creation of this demo. Artisanally handcrafted in a plain text editor :)</div>
+<div id="footer"><em>NO</em> AI was used in the creation of this demo. Artisanally handcrafted in a plain text editor :)</div>
 <script>
 var parser, xmlDoc;
 var theXML = '<text>' +
@@ -490,9 +588,9 @@ function displayPoem(xmlText) {
 								}
 							}
 							if(showGlosses) {
-								displayText = displayText + "<span onMouseOver='displayDict(&quot;" + dictItem + "&quot;)' onMouseOut='hideDict()' class='normalText" + wordRhyme + "'><ruby>" + theLine.childNodes[k].textContent + "<rt>" + wordNotation + "</rt></ruby></span>";
+								displayText = displayText + "<span onClick='displayDict(&quot;" + dictItem + "&quot;)' class='normalText" + wordRhyme + "'><ruby>" + theLine.childNodes[k].textContent + "<rt>" + wordNotation + "</rt></ruby></span>";
 							} else {
-								displayText = displayText + "<span class='normalText" + wordRhyme + "' onMouseOver='displayDict(&quot;" + dictItem + "&quot;)' onMouseOut='hideDict()'>" + theLine.childNodes[k].textContent + "</span>";
+								displayText = displayText + "<span class='normalText" + wordRhyme + "' onClick='displayDict(&quot;" + dictItem + "&quot;)'>" + theLine.childNodes[k].textContent + "</span>";
 							}
 							
 							if(dictItem != 404) {
@@ -538,9 +636,9 @@ function displayPoem(xmlText) {
 	document.getElementById("thePoem").innerHTML = displayText;
 
 	// Part of Speech
-	var margin = {top: 10, right: 10, bottom: 50, left: 80},
-		width = 400 - margin.left - margin.right,
-		height = 300 - margin.top - margin.bottom;
+	var margin = {top: 10, right: 70, bottom: 50, left: 90},
+		width = 500 - margin.left - margin.right,
+		height = 400 - margin.top - margin.bottom;
 	document.getElementById("wordPartGraph").innerHTML = '';
 	var svg = d3.select("#wordPartGraph")
 		.data(numCounts)
@@ -558,14 +656,17 @@ function displayPoem(xmlText) {
 		.call(d3.axisBottom(graphx))
 		.selectAll("text")
 			.attr("transform", "translate(-10,0)rotate(-45)")
-			.style("text-anchor", "end");
+			.style("text-anchor", "end")
+			.style("font-size", "15px");
 
 	var graphy = d3.scaleBand()
 		.range([0, height])
 		.domain(d3.groupSort(numCounts, ([d]) => -d.currentCount, (d) => d.partOfSpeech))
 		.padding(1);
 	svg.append("g")
-		.call(d3.axisLeft(graphy));
+		.call(d3.axisLeft(graphy))
+		.selectAll("text")
+			.style("font-size", "15px");
 
 	svg.selectAll("myline")
 		.data(numCounts)
@@ -583,24 +684,36 @@ function displayPoem(xmlText) {
 		.append("circle")
 			.attr("cx", function(d) { return graphx(d.currentCount); })
 			.attr("cy", function(d) { return graphy(d.partOfSpeech); })
-			.attr("r", "4")
-			.style("fill", "#69b3a2") // Can I replace this with a turtle + the count?
+			.attr("r", "7")
+			.style("fill", "#f6e7e1")
 			.attr("stroke", "black");
+	
+	svg.selectAll("mycircle")
+		.data(numCounts)
+		.enter()
+		.append("text")
+			.attr("x", function(d) { return graphx(d.currentCount); })
+			.attr("y", function(d) { return graphy(d.partOfSpeech) + 3; })
+			.text(function(d) { return d.currentCount; })
+			.attr("font-size", "10px")
+			.attr("text-anchor", "middle");
 
-	//var partOfSpeechSummary = '';
-	//for (let n = 0; n < numCounts.length; n++) {
-	//	partOfSpeechSummary = partOfSpeechSummary + numCounts[n].partOfSpeech + " - " + numCounts[n].currentCount + "<br />"
-	//}
-
-	//document.getElementById("wordCount").innerHTML = partOfSpeechSummary;
+	svg.selectAll("image")
+		.data(numCounts)
+		.enter()
+		.append("svg:image")
+			.attr("x", function(d) { return graphx(d.currentCount)+10;})
+			.attr("y", function(d) { return graphy(d.partOfSpeech)-10; })
+			.attr("xlink:href", "turtle-icon.png")
+			.attr("text-anchor", "middle");
 
 	// Word Count
 	document.getElementById("wordCount").innerHTML = totalWords;
 
 	// Noun Gender
-	var margin = {top: 10, right: 10, bottom: 50, left: 80},
-		width = 400 - margin.left - margin.right,
-		height = 200 - margin.top - margin.bottom;
+	var margin = {top: 10, right: 70, bottom: 50, left: 90},
+		width = 500 - margin.left - margin.right,
+		height = 250 - margin.top - margin.bottom;
 	document.getElementById("gramGender").innerHTML = '';
 	var svg = d3.select("#gramGender")
 		.data(numGender)
@@ -618,14 +731,17 @@ function displayPoem(xmlText) {
 		.call(d3.axisBottom(graphx))
 		.selectAll("text")
 			.attr("transform", "translate(-10,0)rotate(-45)")
-			.style("text-anchor", "end");
+			.style("text-anchor", "end")
+			.style("font-size", "15px");
 
 	var graphy = d3.scaleBand()
 		.range([0, height])
 		.domain(d3.groupSort(numGender, ([d]) => -d.currentCount, (d) => d.gender))
 		.padding(1);
 	svg.append("g")
-		.call(d3.axisLeft(graphy));
+		.call(d3.axisLeft(graphy))
+		.selectAll("text")
+			.style("font-size", "15px");
 
 	svg.selectAll("myline")
 		.data(numGender)
@@ -636,16 +752,35 @@ function displayPoem(xmlText) {
 			.attr("y1", function(d) { return graphy(d.gender); })
 			.attr("y2", function(d) { return graphy(d.gender); })
 			.attr("stroke", "grey");
-
+	
 	svg.selectAll("mycircle")
 		.data(numGender)
 		.enter()
 		.append("circle")
 			.attr("cx", function(d) { return graphx(d.currentCount); })
 			.attr("cy", function(d) { return graphy(d.gender); })
-			.attr("r", "4")
-			.style("fill", "#69b3a2") // Can I replace this with a turtle + the count?
+			.attr("r", "7")
+			.style("fill", "#f6e7e1")
 			.attr("stroke", "black");
+	
+	svg.selectAll("mycircle")
+		.data(numGender)
+		.enter()
+		.append("text")
+			.attr("x", function(d) { return graphx(d.currentCount); })
+			.attr("y", function(d) { return graphy(d.gender) + 3; })
+			.text(function(d) { return d.currentCount; })
+			.attr("font-size", "10px")
+			.attr("text-anchor", "middle");
+
+	svg.selectAll("image")
+		.data(numGender)
+		.enter()
+		.append("svg:image")
+			.attr("x", function(d) { return graphx(d.currentCount)+10;})
+			.attr("y", function(d) { return graphy(d.gender)-10; })
+			.attr("xlink:href", "turtle-icon.png")
+			.attr("text-anchor", "middle");
 
 };
 
@@ -656,7 +791,7 @@ document.getElementById("theTitle").innerHTML = xmlDoc.getElementsByTagName("tit
 displayPoem(xmlDoc);
 var theAuthor = xmlDoc.getElementsByTagName("author")[0].childNodes[0].nodeValue;
 var theSource = xmlDoc.getElementsByTagName("source")[0].childNodes[0].nodeValue;
-document.getElementById("theSource").innerHTML = "<div id='theAuthor'>" + theAuthor + "</div><div id='theSource'>" +  theSource + "</div>";
+document.getElementById("theSource").innerHTML = "<div id='theAuthor'>" + theAuthor + "</div><div id='thePoemSource'>" +  theSource + "</div>";
 </script>
 
 </body>
