@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<body>
+
+<style>
+#footer {
+	width: 90%;
+	margin: 10px auto;
+	padding: 5px;
+	font-size: 80%;
+	font-family: monospace;
+	text-align: center;
+}
+
+#leftSide {
+	width: 50%;
+	float: left;
+	margin-right: 10px;
+	margin-top: 5px;
+	border-radius: 5px;
+	border: 1px solid black;
+}
+
+#originalXML {
+	width: 90%;
+	margin: 5px auto;
+	padding: 20px;
+	font-size: 90%;
+	font-family: monospace;
+	background-color: #eee;
+}
+
+#poemDetails {
+	width: 95%;
+	margin: 5px auto;
+	padding: 0px;
+	overflow: hidden;
+}
+
+#projectTitle {
+	display: block;
+	width: 90%;
+	margin: 5px auto;
+	padding: 15px;
+	font-size: 200%;
+	font-family: monospace;
+	text-align: center;
+}
+
+.rhyme-a {
+	color: blue;
+	font-weight: bold;
+}
+
+.rhyme-b {
+	color: orange;
+	font-weight: bold;
+}
+
+#rightSide {
+	float: left;
+	margin-top: 5px;
+	border-radius: 5px;
+	border: 1px solid black;
+}
+
+rt {
+	font-size: 60%;
+	color: #333;
+	margin-top: 5px;
+	text-align: left;
+}
+
+.speechPart {
+	font-style: italic;
+	font-size: 90%;
+}
+
+#theDict, #theGraphs {
+	width: 90%;
+	display: block;
+	margin: 5px auto;
+	padding: 10px;
+}
+
+#thePoem {
+	margin: 5px auto;
+	padding: 15px;
+	font-size: 150%;
+	font-family: monospace;	
+}
+
+#theSelections {
+	display: block;
+	width: 90%;
+	margin: 5px auto;
+	padding: 15px;
+	font-family: monospace;
+	text-align: center;
+}
+
+#theTitle {
+	display: block;
+	margin: 5px auto;
+	padding: 10px;
+	font-size: 150%;
+	font-weight: bold;
+	font-family: "Book Antiqua";
+}
+
+.wordHeader {
+	font-weight: bold;
+	font-size: 110%;
+}
+</style>
+
+<div id="projectTitle">Digital Humanities Demo: The Turtle</div>
+
+
+
+<div id="theSelections">
+	<input type="checkbox" id="v1" name="v1" checked onChange="displayPoem(xmlDoc)">
+		<label for="v1"> Verse 1</label> - 
+	<input type="checkbox" id="v2" name="v2" checked onChange="displayPoem(xmlDoc)">
+		<label for="v2"> Verse 2</label> - 
+	<input type="checkbox" id="v3" name="v3" checked onChange="displayPoem(xmlDoc)">
+		<label for="v3"> Verse 3</label> - 
+	<input type="checkbox" id="showRhyme" name="showRhyme" onChange="displayPoem(xmlDoc)">
+		<label for="showRhyme">Highlight Rhymes</label> - 
+	<input type="checkbox" id="showGloss" name="showGloss" onChange="displayPoem(xmlDoc)">
+		<label for="showGloss">Show Translation Gloss</label>
+</div>
+
+<div id="poemDetails">
+<div id="leftSide">
+<div id="theTitle"></div>
+<div id="thePoem"></div>
+<div id="theSource"></div>
+</div>
+<div id="rightSide">
+<div id="theDict">
+	<h3>Dictionary</h3>
+	<h4>Hover over a word to view its definition.</h4>
+	<div id="dictEntry">
+		<span class='wordHeader'>&nbsp;</span><br />
+		<span class='speechPart'>&nbsp;</span> <br />
+		<span class='def'>&nbsp;</span>
+	</div>
+</div>
+<div id="theGraphs">
+	<h3>Data for Selected Verses</h3>
+	<h4>Total Words</h4>
+	<div id="wordCount"></div>
+	<h4>Words by Part of Speech</h4>
+	<div id="wordPartGraph"></div>
+	<h4>Nouns by Grammatical Gender</h4>
+	<div id="gramGender"></div>
+</div>
+</div>
+</div>
+
+<hr> 
+
+<div id="intro">This demo consists of TEI-formatted XML data containing the public domain poem <i>Die Schildkröte</i> (<i>The Turtle</i>) by the German poet Christian Morgenstern.  The German compound word "Schildkröte" literally breaks apart into "shield-toad." The XML is parsed and displayed using JavaScript, and the visuals are generated using the d3 package for JavaScript.<br /><a href="https://encyclopaedia-fortuita.com/index.php/academic-papers/">My personal website contains papers on hypertext and digitizing and analyzing Samuel Johnson's dictionary.</a><br />
+<a href="">The code for this page is available at GitHub.</a>
+</div>
+<hr>
+
+<div id="originalXML">
+<h3>Original XML</h3>
+<pre>
+	&lt;text&gt;
+	&lt;front&gt;
+	&lt;docTitle&gt;
+	&lt;titlePart&gt;Die Schildkröte&lt;/titlePart&gt;
+	&lt;/docTitle&gt;
+	&lt;/front&gt;
+	&lt;body&gt;
+	&lt;lg rhyme=&quot;abab&quot;&gt;
+		&lt;l&gt;
+			&lt;w lemma=&quot;ich&quot; notation=&quot;I&quot;&gt;»Ich &lt;/w&gt;
+			&lt;w lemma=&quot;sein&quot; notation=&quot;am&quot;&gt;bin &lt;/w&gt;
+			&lt;w lemma=&quot;nun&quot; notation=&quot;now&quot;&gt;nun &lt;/w&gt;
+			&lt;w lemma=&quot;tausend&quot; notation=&quot;a thousand&quot;&gt;tausend &lt;/w&gt;
+			&lt;w lemma=&quot;Jahr&quot; notation=&quot;years&quot;&gt;Jahre &lt;/w&gt;
+			&lt;w lemma=&quot;alt&quot; notation=&quot;old&quot; rhyme=&quot;a&quot;&gt;alt &lt;/w&gt;
+		&lt;/l&gt;
+		&lt;l&gt;
+			&lt;w lemma=&quot;und&quot; notation=&quot;and&quot;&gt;und &lt;/w&gt;
+			&lt;w lemma=&quot;werden&quot; notation=&quot;become&quot;&gt;werde &lt;/w&gt;
+			&lt;w lemma=&quot;täglich&quot; notation=&quot;daily&quot;&gt;täglich &lt;/w&gt;
+			&lt;w lemma=&quot;alt&quot; notation=&quot;older;&quot; rhyme=&quot;b&quot;&gt;älter; &lt;/w&gt;
+		&lt;/l&gt;
+		&lt;l&gt;
+			&lt;w lemma=&quot;der&quot; notation=&quot;the&quot;&gt;der &lt;/w&gt;
+			&lt;w lemma=&quot;Gotenkönig&quot; notation=&quot;king of the Goths&quot;&gt;Gotenkönig &lt;/w&gt;
+			&lt;w lemma=&quot;Theobald&quot; notation=&quot;Theobald&quot; rhyme=&quot;a&quot;&gt;Theobald &lt;/w&gt;
+		&lt;/l&gt;
+		&lt;l&gt;
+			&lt;w lemma=&quot;erziehen&quot; notation=&quot;raised&quot;&gt;erzog &lt;/w&gt;
+			&lt;w lemma=&quot;ich&quot; notation=&quot;me&quot;&gt;mich &lt;/w&gt;
+			&lt;w lemma=&quot;in&quot; notation=&quot;in a&quot;&gt;im &lt;/w&gt;
+			&lt;w lemma=&quot;Behälter&quot; notation=&quot;container.&quot; rhyme=&quot;b&quot;&gt;Behälter. &lt;/w&gt;
+		&lt;/l&gt;
+	&lt;/lg&gt;
+	
+	&lt;lg rhyme=&quot;abab&quot;&gt;
+		&lt;l&gt;
+			&lt;w lemma=&quot;seitdem&quot; notation=&quot;Since then&quot;&gt;Seitdem &lt;/w&gt;
+			&lt;w lemma=&quot;sein&quot; notation=&quot;have&quot;&gt;ist &lt;/w&gt;
+			&lt;w lemma=&quot;mancherlei&quot; notation=&quot;various things&quot;&gt;mancherlei &lt;/w&gt;
+			&lt;w lemma=&quot;geschehen&quot; notation=&quot;happened,&quot; rhyme=&quot;a&quot;&gt;geschehn, &lt;/w&gt;
+		&lt;/l&gt;
+		&lt;l&gt;
+			&lt;w lemma=&quot;doch&quot; notation=&quot;but&quot;&gt;doch &lt;/w&gt;
+			&lt;w lemma=&quot;wissen&quot; notation=&quot;know&quot;&gt;weiß &lt;/w&gt;
+			&lt;w lemma=&quot;ich&quot; notation=&quot;I&quot;&gt;ich &lt;/w&gt;
+			&lt;w lemma=&quot;nichts&quot; notation=&quot;nothing&quot;&gt;nichts &lt;/w&gt;
+			&lt;w lemma=&quot;davon&quot; notation=&quot;of that;&quot; rhyme=&quot;b&quot;&gt;davon; &lt;/w&gt;
+		&lt;/l&gt;
+		&lt;l&gt;
+			&lt;w lemma=&quot;zu&quot; notation=&quot;at&quot;&gt;zur &lt;/w&gt;
+			&lt;w lemma=&quot;Zeit&quot; notation=&quot;the time,&quot;&gt;Zeit, &lt;/w&gt;
+			&lt;w lemma=&quot;da&quot; notation=&quot;there&quot;&gt;da &lt;/w&gt;
+			&lt;w lemma=&quot;lassen&quot; notation=&quot;allowed&quot;&gt;läßt &lt;/w&gt;
+			&lt;w lemma=&quot;für&quot; notation=&quot;for&quot;&gt;für &lt;/w&gt;
+			&lt;w lemma=&quot;Geld&quot; notation=&quot;money&quot;&gt;Geld &lt;/w&gt;
+			&lt;w lemma=&quot;ich&quot; notation=&quot;me&quot;&gt;mich &lt;/w&gt;
+			&lt;w lemma=&quot;sehen&quot; notation=&quot;to be seen&quot; rhyme=&quot;a&quot;&gt;sehn &lt;/w&gt;
+		&lt;/l&gt;
+		&lt;l&gt;
+			&lt;w lemma=&quot;ein&quot; notation=&quot;a&quot;&gt;ein &lt;/w&gt;
+			&lt;w lemma=&quot;Kaufmann&quot; notation=&quot;merchant&quot;&gt;Kaufmann &lt;/w&gt;
+			&lt;w lemma=&quot;zu&quot; notation=&quot;at&quot;&gt;zu &lt;/w&gt;
+			&lt;w lemma=&quot;Heilbronn&quot; notation=&quot;Heilbronn&quot; rhyme=&quot;b&quot;&gt;Heilbronn.&lt;/w&gt;
+		&lt;/l&gt;
+	&lt;/lg&gt;
+	
+	&lt;lg rhyme=&quot;abab&quot;&gt;
+		&lt;l&gt;
+			&lt;w lemma=&quot;ich&quot; notation=&quot;I&quot;&gt;Ich &lt;/w&gt;
+			&lt;w lemma=&quot;kennen&quot; notation=&quot;know&quot;&gt;kenne &lt;/w&gt;
+			&lt;w lemma=&quot;nicht&quot; notation=&quot;not&quot;&gt;nicht &lt;/w&gt;
+			&lt;w lemma=&quot;das&quot; notation=&quot;of&quot;&gt;des &lt;/w&gt;
+			&lt;w lemma=&quot;Tod&quot; notation=&quot;Death&#39;s&quot;&gt;Todes &lt;/w&gt;
+			&lt;w lemma=&quot;Bild&quot; notation=&quot;image&quot; rhyme=&quot;a&quot;&gt;Bild &lt;/w&gt;
+		&lt;/l&gt;
+		&lt;l&gt;
+			&lt;w lemma=&quot;und&quot; notation=&quot;and&quot;&gt;und &lt;/w&gt;
+			&lt;w lemma=&quot;nicht&quot; notation=&quot;not&quot;&gt;nicht &lt;/w&gt;
+			&lt;w lemma=&quot;das&quot; notation=&quot;of&quot;&gt;des &lt;/w&gt; 
+			&lt;w lemma=&quot;Sterben&quot; notation=&quot;Dying&#39;s&quot;&gt;Sterbens &lt;/w&gt;
+			&lt;w lemma=&quot;Not&quot; notation=&quot;urgency:&quot; rhyme=&quot;b&quot;&gt;Nöte: &lt;/w&gt;
+		&lt;/l&gt;
+		&lt;l&gt;
+			&lt;w lemma=&quot;ich&quot; notation=&quot;I&quot;&gt;Ich &lt;/w&gt;
+			&lt;w lemma=&quot;sein&quot; notation=&quot;am&quot;&gt;bin &lt;/w&gt;
+			&lt;w lemma=&quot;die&quot; notation=&quot;the&quot;&gt;die &lt;/w&gt;
+			&lt;w lemma=&quot;Schild&quot; notation=&quot;shield&quot;&gt;Schild - &lt;/w&gt;
+			&lt;w lemma=&quot;ich&quot; notation=&quot;I&quot;&gt;ich &lt;/w&gt;
+			&lt;w lemma=&quot;sein&quot; notation=&quot;am&quot;&gt;bin &lt;/w&gt;
+			&lt;w lemma=&quot;die&quot; notation=&quot;the&quot;&gt;die &lt;/w&gt;
+			&lt;w lemma=&quot;Schild&quot; notation=&quot;shield&quot; rhyme=&quot;a&quot;&gt;Schild - &lt;/w&gt;
+		&lt;/l&gt;
+		&lt;l&gt;
+			&lt;w lemma=&quot;ich&quot; notation=&quot;I&quot;&gt;ich &lt;/w&gt;
+			&lt;w lemma=&quot;sein&quot; notation=&quot;am&quot;&gt;bin &lt;/w&gt;
+			&lt;w lemma=&quot;die&quot; notation=&quot;the&quot;&gt;die &lt;/w&gt;
+			&lt;w lemma=&quot;Schild&quot; notation=&quot;shield&quot;&gt;Schild - &lt;/w&gt;
+			&lt;w lemma=&quot;Kröte&quot; notation=&quot;toe&quot;&gt;krö - &lt;/w&gt;
+			&lt;w lemma=&quot;Kröte&quot; notation=&quot;toad.&quot; rhyme=&quot;b&quot;&gt;kröte.«&lt;/w&gt;
+		&lt;/l&gt;
+	&lt;/lg&gt;
+	&lt;/body&gt;
+	&lt;back&gt;
+	&lt;author&gt;Christian Morgenstern&lt;/author&gt;
+	&lt;source&gt;Alle Galgenlieder, 1932&lt;/source&gt;
+	&lt;/back&gt;
+	&lt;/text&gt;
+</pre>
+<br />
+<h3>Dictionary</h3>
+<pre>
+[
+{theWord:"alt", partOfSpeech:"adjective", gender:"", definition:"old, ancient"},
+{theWord:"Behälter", partOfSpeech:"noun", gender:"masculine", definition:"container"},
+{theWord:"Bild", partOfSpeech:"noun", gender:"neuter", definition:"image, picture"},
+{theWord:"da", partOfSpeech:"adverb", gender:"", definition:"there, then"},
+{theWord:"davon", partOfSpeech:"adverb", gender:"", definition:"from that"},
+{theWord:"das", partOfSpeech:"article", gender:"neuter", definition:"the"},
+{theWord:"der", partOfSpeech:"article", gender:"masculine", definition:"the"},
+{theWord:"die", partOfSpeech:"article", gender:"feminine", definition:"the"},
+{theWord:"doch", partOfSpeech:"conjunction", gender:"", definition:"though, but"},
+{theWord:"ein", partOfSpeech:"article", gender:"", definition:"a, an"},
+{theWord:"erziehen", partOfSpeech:"verb", gender:"", definition:"to nurture"},
+{theWord:"für", partOfSpeech:"preposition", gender:"", definition:"for"},
+{theWord:"Geld", partOfSpeech:"noun", gender:"neuter", definition:"money"},
+{theWord:"geschehen", partOfSpeech:"verb", gender:"", definition:"to occur, happen"},
+{theWord:"Gotenkönig", partOfSpeech:"noun", gender:"masculine", definition:"king of the Goths"},
+{theWord:"Heilbronn", partOfSpeech:"noun", gender:"neuter", definition:"city in Baden-Württemberg"},
+{theWord:"ich", partOfSpeech:"pronoun", gender:"", definition:"I"},
+{theWord:"in", partOfSpeech:"preposition", gender:"", definition:"in, at"},
+{theWord:"Jahr", partOfSpeech:"noun", gender:"neuter", definition:"year"},
+{theWord:"Kaufmann", partOfSpeech:"noun", gender:"masculine", definition:"merchant, trader"},
+{theWord:"kennen", partOfSpeech:"verb", gender:"", definition:"to know, to be familiar with"},
+{theWord:"Kröte", partOfSpeech:"noun", gender:"feminine", definition:"toad"},
+{theWord:"lassen", partOfSpeech:"verb", gender:"", definition:"to let, to cause"},
+{theWord:"mancherlei", partOfSpeech:"adjective", gender:"", definition:"various"},
+{theWord:"nicht", partOfSpeech:"adverb", gender:"", definition:"not"},
+{theWord:"nichts", partOfSpeech:"pronoun", gender:"neuter", definition:"nothing"},
+{theWord:"Not", partOfSpeech:"verb", gender:"feminine", definition:"need, poverty, emergency"},
+{theWord:"nun", partOfSpeech:"adverb", gender:"", definition:"now, then"},
+{theWord:"Schild", partOfSpeech:"noun", gender:"masculine", definition:"shield"},
+{theWord:"sehen", partOfSpeech:"verb", gender:"", definition:"to see, to look at"},
+{theWord:"sein", partOfSpeech:"verb", gender:"", definition:"to be"},
+{theWord:"seitdem", partOfSpeech:"conjunction", gender:"", definition:"since"},
+{theWord:"Sterben", partOfSpeech:"noun", gender:"neuter", definition:"dying"},
+{theWord:"täglich", partOfSpeech:"adverb", gender:"", definition:"daily"},
+{theWord:"tausend", partOfSpeech:"numeral", gender:"", definition:"thousand"},
+{theWord:"Theobald", partOfSpeech:"proper noun", gender:"", definition:"Theobald"},
+{theWord:"Tod", partOfSpeech:"noun", gender:"masculine", definition:"death"},
+{theWord:"und", partOfSpeech:"conjunction", gender:"", definition:"and"},
+{theWord:"werden", partOfSpeech:"verb", gender:"", definition:"to become"},
+{theWord:"wissen", partOfSpeech:"verb", gender:"", definition:"to know"},
+{theWord:"Zeit", partOfSpeech:"noun", gender:"feminine", definition:"time"},
+{theWord:"zu", partOfSpeech:"preposition", gender:"", definition:"to, at"}
+]
+</pre>
+</div>
+<div id="footer"><em>NO</em> AI used in the creation of this demo. Artisanally handcrafted in a plain text editor :)</div>
+<script>
+var parser, xmlDoc;
+var theXML = '<text>' +
+	'<front>' +
+	'<docTitle>' +
+	'<titlePart>Die Schildkröte</titlePart>' +
+	'</docTitle>' +
+	'</front>' +
+	'<body>' +
+	'<lg rhyme="abab">' +
+	'<l><w lemma="ich" notation="I">»Ich </w><w lemma="sein" notation="am">bin </w><w lemma="nun" notation="now">nun </w><w lemma="tausend" notation="a thousand">tausend </w><w lemma="Jahr" notation="years">Jahre </w><w lemma="alt" notation="old" rhyme="a">alt </w></l>' +
+	'<l><w lemma="und" notation="and">und </w><w lemma="werden" notation="become">werde </w><w lemma="täglich" notation="daily">täglich </w><w lemma="alt" notation="older;" rhyme="b">älter; </w></l>' +
+	'<l><w lemma="der" notation="the">der </w><w lemma="Gotenkönig" notation="king of the Goths">Gotenkönig </w><w lemma="Theobald" notation="Theobald" rhyme="a">Theobald </w></l>' +
+	'<l><w lemma="erziehen" notation="raised">erzog </w><w lemma="ich" notation="me">mich </w><w lemma="in" notation="in a">im </w><w lemma="Behälter" notation="container." rhyme="b">Behälter. </w></l>' +
+	'</lg>' +
+	'' +
+	'<lg rhyme="abab">' +
+	'<l><w lemma="seitdem" notation="Since then">Seitdem </w><w lemma="sein" notation="have">ist </w><w lemma="mancherlei" notation="various things">mancherlei </w><w lemma="geschehen" notation="happened," rhyme="a">geschehn, </w></l>' +
+	'<l><w lemma="doch" notation="but">doch </w><w lemma="wissen" notation="know">weiß </w><w lemma="ich" notation="I">ich </w><w lemma="nichts" notation="nothing">nichts </w><w lemma="davon" notation="of that;" rhyme="b">davon; </w></l>' +
+	'<l><w lemma="zu" notation="at">zur </w><w lemma="Zeit" notation="the time,">Zeit, </w><w lemma="da" notation="there">da </w><w lemma="lassen" notation="allowed">läßt </w><w lemma="für" notation="for">für </w><w lemma="Geld" notation="money">Geld </w><w lemma="ich" notation="me">mich </w><w lemma="sehen" notation="to be seen" rhyme="a">sehn </w></l>' +
+	'<l><w lemma="ein" notation="a">ein </w><w lemma="Kaufmann" notation="merchant">Kaufmann </w><w lemma="zu" notation="at">zu </w><w lemma="Heilbronn" notation="Heilbronn" rhyme="b">Heilbronn.</w></l>' +
+	'</lg>' +
+	'' +
+	'<lg rhyme="abab">' +
+	'<l><w lemma="ich" notation="I">Ich </w><w lemma="kennen" notation="know">kenne </w><w lemma="nicht" notation="not">nicht </w><w lemma="das" notation="of">des </w><w lemma="Tod" notation="Death&#39;s">Todes </w><w lemma="Bild" notation="image" rhyme="a">Bild </w></l>' +
+	'<l><w lemma="und" notation="and">und </w><w lemma="nicht" notation="not">nicht </w><w lemma="das" notation="of">des </w><w lemma="Sterben" notation="Dying&#39;s">Sterbens </w><w lemma="Not" notation="urgency:" rhyme="b">Nöte: </w></l>' +
+	'<l><w lemma="ich" notation="I">Ich </w><w lemma="sein" notation="am">bin </w><w lemma="die" notation="the">die </w><w lemma="Schild" notation="shield">Schild - </w><w lemma="ich" notation="I">ich </w><w lemma="sein" notation="am">bin </w><w lemma="die" notation="the">die </w><w lemma="Schild" notation="shield" rhyme="a">Schild - </w></l>' +
+	'<l><w lemma="ich" notation="I">Ich </w><w lemma="sein" notation="am">bin </w><w lemma="die" notation="the">die </w><w lemma="Schild" notation="shield">Schild - </w><w lemma="Kröte" notation="toe">krö - </w><w lemma="Kröte" notation="toad." rhyme="b">kröte.«</w></l>' +
+	'</lg>' +
+	'</body>' +
+	'<back>' +
+	'<author>Christian Morgenstern</author>' +
+	'<source>Alle Galgenlieder, 1932</source>' +
+	'</back>' +
+	'</text>';
+
+const theDictionary = [
+{theWord:"alt", partOfSpeech:"adjective", gender:"", definition:"old, ancient"},
+{theWord:"Behälter", partOfSpeech:"noun", gender:"masculine", definition:"container"},
+{theWord:"Bild", partOfSpeech:"noun", gender:"neuter", definition:"image, picture"},
+{theWord:"da", partOfSpeech:"adverb", gender:"", definition:"there, then"},
+{theWord:"davon", partOfSpeech:"adverb", gender:"", definition:"from that"},
+{theWord:"das", partOfSpeech:"article", gender:"neuter", definition:"the"},
+{theWord:"der", partOfSpeech:"article", gender:"masculine", definition:"the"},
+{theWord:"die", partOfSpeech:"article", gender:"feminine", definition:"the"},
+{theWord:"doch", partOfSpeech:"conjunction", gender:"", definition:"though, but"},
+{theWord:"ein", partOfSpeech:"article", gender:"", definition:"a, an"},
+{theWord:"erziehen", partOfSpeech:"verb", gender:"", definition:"to nurture"},
+{theWord:"für", partOfSpeech:"preposition", gender:"", definition:"for"},
+{theWord:"Geld", partOfSpeech:"noun", gender:"neuter", definition:"money"},
+{theWord:"geschehen", partOfSpeech:"verb", gender:"", definition:"to occur, happen"},
+{theWord:"Gotenkönig", partOfSpeech:"noun", gender:"masculine", definition:"king of the Goths"},
+{theWord:"Heilbronn", partOfSpeech:"noun", gender:"neuter", definition:"city in Baden-Württemberg"},
+{theWord:"ich", partOfSpeech:"pronoun", gender:"", definition:"I"},
+{theWord:"in", partOfSpeech:"preposition", gender:"", definition:"in, at"},
+{theWord:"Jahr", partOfSpeech:"noun", gender:"neuter", definition:"year"},
+{theWord:"Kaufmann", partOfSpeech:"noun", gender:"masculine", definition:"merchant, trader"},
+{theWord:"kennen", partOfSpeech:"verb", gender:"", definition:"to know, to be familiar with"},
+{theWord:"Kröte", partOfSpeech:"noun", gender:"feminine", definition:"toad"},
+{theWord:"lassen", partOfSpeech:"verb", gender:"", definition:"to let, to cause"},
+{theWord:"mancherlei", partOfSpeech:"adjective", gender:"", definition:"various"},
+{theWord:"nicht", partOfSpeech:"adverb", gender:"", definition:"not"},
+{theWord:"nichts", partOfSpeech:"pronoun", gender:"neuter", definition:"nothing"},
+{theWord:"Not", partOfSpeech:"verb", gender:"feminine", definition:"need, poverty, emergency"},
+{theWord:"nun", partOfSpeech:"adverb", gender:"", definition:"now, then"},
+{theWord:"Schild", partOfSpeech:"noun", gender:"masculine", definition:"shield"},
+{theWord:"sehen", partOfSpeech:"verb", gender:"", definition:"to see, to look at"},
+{theWord:"sein", partOfSpeech:"verb", gender:"", definition:"to be"},
+{theWord:"seitdem", partOfSpeech:"conjunction", gender:"", definition:"since"},
+{theWord:"Sterben", partOfSpeech:"noun", gender:"neuter", definition:"dying"},
+{theWord:"täglich", partOfSpeech:"adverb", gender:"", definition:"daily"},
+{theWord:"tausend", partOfSpeech:"numeral", gender:"", definition:"thousand"},
+{theWord:"Theobald", partOfSpeech:"proper noun", gender:"", definition:"Theobald"},
+{theWord:"Tod", partOfSpeech:"noun", gender:"masculine", definition:"death"},
+{theWord:"und", partOfSpeech:"conjunction", gender:"", definition:"and"},
+{theWord:"werden", partOfSpeech:"verb", gender:"", definition:"to become"},
+{theWord:"wissen", partOfSpeech:"verb", gender:"", definition:"to know"},
+{theWord:"Zeit", partOfSpeech:"noun", gender:"feminine", definition:"time"},
+{theWord:"zu", partOfSpeech:"preposition", gender:"", definition:"to, at"}
+];
+
+function displayDict(dictItem) {
+	if(dictItem != 404) {
+		document.getElementById("dictEntry").innerHTML = "<span class='wordHeader'>" + theDictionary[dictItem].theWord + "</span><br /><span class='speechPart'>" + theDictionary[dictItem].gender + " " + theDictionary[dictItem].partOfSpeech + "</span><br /><span class='def'>" + theDictionary[dictItem].definition + "</span>";	
+	}
+}
+
+function hideDict() {
+	document.getElementById("dictEntry").innerHTML = "<span class='wordHeader'>&nbsp;</span><br /><span class='speechPart'>&nbsp;</span> <br /><span class='def'>&nbsp;</span>";	
+}
+
+function lookUpWord(lookupWord) {
+	for (let i = 0; i < theDictionary.length; i++) {
+		if(theDictionary[i].theWord == lookupWord) {
+			return i;
+		}
+	}
+	return 404;
+}
+
+function displayPoem(xmlText) {
+	var i, j, k, m, n, theVerse, verseLength, theLine, lineLength;
+	var theWord, wordAttributes;
+	var x = xmlText.getElementsByTagName("lg");
+	var displayText = '';
+	var showVerse = [];
+	showVerse.push(document.getElementById("v1").checked, document.getElementById("v2").checked, document.getElementById("v3").checked);
+	var showRhymes = document.getElementById("showRhyme").checked;
+	var showGlosses = document.getElementById("showGloss").checked;
+	
+	var numCounts = [
+		{partOfSpeech:"adjective",currentCount:0},
+		{partOfSpeech:"adverb",currentCount:0},
+		{partOfSpeech:"article",currentCount:0},
+		{partOfSpeech:"conjunction",currentCount:0},
+		{partOfSpeech:"noun",currentCount:0},
+		{partOfSpeech:"numeral",currentCount:0},
+		{partOfSpeech:"preposition",currentCount:0},
+		{partOfSpeech:"pronoun",currentCount:0},
+		{partOfSpeech:"verb",currentCount:0}
+	];
+	var totalWords = 0;
+	var numGender = [
+		{gender:"feminine",currentCount:0},
+		{gender:"masculine",currentCount:0},
+		{gender:"neuter",currentCount:0}
+	];
+	var wordCounts = [];
+	
+	for (let i = 0; i < x.length; i++) {
+		if(showVerse[i]) {
+			theVerse = xmlDoc.getElementsByTagName("lg")[i];
+			verseLength = theVerse.childNodes.length;
+			theLine = theVerse.firstChild;
+			for (j = 0; j < verseLength; j++) {
+				if(theLine.nodeType = "l") {
+					lineLength = theLine.childNodes.length;
+					for (k = 0; k < lineLength; k++) {
+						if(theLine.childNodes[k].nodeType = "w") {
+							wordAttributes = theLine.childNodes[k].attributes;
+							var wordLemma = '';
+							var wordNotation = '';
+							var wordRhyme = '';
+							var dictItem = 404; 
+							
+							if(wordAttributes) {
+								for (m = 0; m < wordAttributes.length; m++ ) {
+									if(wordAttributes[m].nodeName == "lemma") {
+										wordLemma = wordAttributes[m].nodeValue;
+										dictItem = lookUpWord(wordLemma)
+									}
+									if(wordAttributes[m].nodeName == "notation") {
+										wordNotation = wordAttributes[m].nodeValue;
+									}
+									if(wordAttributes[m].nodeName == "rhyme" && showRhymes) {
+										wordRhyme = ' rhyme-' + wordAttributes[m].nodeValue;
+									}
+								}
+							}
+							if(showGlosses) {
+								displayText = displayText + "<span onMouseOver='displayDict(&quot;" + dictItem + "&quot;)' onMouseOut='hideDict()' class='normalText" + wordRhyme + "'><ruby>" + theLine.childNodes[k].textContent + "<rt>" + wordNotation + "</rt></ruby></span>";
+							} else {
+								displayText = displayText + "<span class='normalText" + wordRhyme + "' onMouseOver='displayDict(&quot;" + dictItem + "&quot;)' onMouseOut='hideDict()'>" + theLine.childNodes[k].textContent + "</span>";
+							}
+							
+							if(dictItem != 404) {
+								totalWords += 1;
+								
+								for (let n = 0; n < numCounts.length; n++) {
+									if(numCounts[n].partOfSpeech == theDictionary[dictItem].partOfSpeech) {
+										numCounts[n].currentCount += 1;
+									}
+								}
+
+								if(theDictionary[dictItem].gender.length > 0) {
+									for (let n = 0; n < numGender.length; n++) {
+										if(numGender[n].gender == theDictionary[dictItem].gender) {
+											numGender[n].currentCount += 1;
+										}
+									}
+								}
+
+								var wordFound = 0;
+								if(wordCounts.length > 0) {
+									for (let n = 0; n < wordCounts.length; n++) {
+										if(wordCounts[n].theWord == wordLemma) {
+											wordCounts[n].currentCount += 1;
+											wordFound = 1;
+										}
+									}
+								}
+								if(wordFound == 0) {
+									wordCounts.push({theWord: wordLemma, currentCount: 1});
+								}
+							}						
+						}
+					}
+				}
+				theLine = theLine.nextSibling;	
+				displayText = displayText + "<br />"
+			}
+			displayText = displayText + "<br />"
+		}
+	}
+	
+	document.getElementById("thePoem").innerHTML = displayText;
+
+	// Part of Speech
+	var margin = {top: 10, right: 10, bottom: 50, left: 80},
+		width = 400 - margin.left - margin.right,
+		height = 300 - margin.top - margin.bottom;
+	document.getElementById("wordPartGraph").innerHTML = '';
+	var svg = d3.select("#wordPartGraph")
+		.data(numCounts)
+		.append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	var graphx = d3.scaleLinear()
+		.domain([0, d3.max(numCounts, (d) => d.currentCount)])
+		.range([0, width]);
+	svg.append("g")
+		.attr("transform", "translate(0," + height + ")")
+		.call(d3.axisBottom(graphx))
+		.selectAll("text")
+			.attr("transform", "translate(-10,0)rotate(-45)")
+			.style("text-anchor", "end");
+
+	var graphy = d3.scaleBand()
+		.range([0, height])
+		.domain(d3.groupSort(numCounts, ([d]) => -d.currentCount, (d) => d.partOfSpeech))
+		.padding(1);
+	svg.append("g")
+		.call(d3.axisLeft(graphy));
+
+	svg.selectAll("myline")
+		.data(numCounts)
+		.enter()
+		.append("line")
+			.attr("x1", function(d) { return graphx(d.currentCount); })
+			.attr("x2", graphx(0))
+			.attr("y1", function(d) { return graphy(d.partOfSpeech); })
+			.attr("y2", function(d) { return graphy(d.partOfSpeech); })
+			.attr("stroke", "grey");
+
+	svg.selectAll("mycircle")
+		.data(numCounts)
+		.enter()
+		.append("circle")
+			.attr("cx", function(d) { return graphx(d.currentCount); })
+			.attr("cy", function(d) { return graphy(d.partOfSpeech); })
+			.attr("r", "4")
+			.style("fill", "#69b3a2") // Can I replace this with a turtle + the count?
+			.attr("stroke", "black");
+
+	//var partOfSpeechSummary = '';
+	//for (let n = 0; n < numCounts.length; n++) {
+	//	partOfSpeechSummary = partOfSpeechSummary + numCounts[n].partOfSpeech + " - " + numCounts[n].currentCount + "<br />"
+	//}
+
+	//document.getElementById("wordCount").innerHTML = partOfSpeechSummary;
+
+	// Word Count
+	document.getElementById("wordCount").innerHTML = totalWords;
+
+	// Noun Gender
+	var margin = {top: 10, right: 10, bottom: 50, left: 80},
+		width = 400 - margin.left - margin.right,
+		height = 200 - margin.top - margin.bottom;
+	document.getElementById("gramGender").innerHTML = '';
+	var svg = d3.select("#gramGender")
+		.data(numGender)
+		.append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	var graphx = d3.scaleLinear()
+		.domain([0, d3.max(numGender, (d) => d.currentCount)])
+		.range([0, width]);
+	svg.append("g")
+		.attr("transform", "translate(0," + height + ")")
+		.call(d3.axisBottom(graphx))
+		.selectAll("text")
+			.attr("transform", "translate(-10,0)rotate(-45)")
+			.style("text-anchor", "end");
+
+	var graphy = d3.scaleBand()
+		.range([0, height])
+		.domain(d3.groupSort(numGender, ([d]) => -d.currentCount, (d) => d.gender))
+		.padding(1);
+	svg.append("g")
+		.call(d3.axisLeft(graphy));
+
+	svg.selectAll("myline")
+		.data(numGender)
+		.enter()
+		.append("line")
+			.attr("x1", function(d) { return graphx(d.currentCount); })
+			.attr("x2", graphx(0))
+			.attr("y1", function(d) { return graphy(d.gender); })
+			.attr("y2", function(d) { return graphy(d.gender); })
+			.attr("stroke", "grey");
+
+	svg.selectAll("mycircle")
+		.data(numGender)
+		.enter()
+		.append("circle")
+			.attr("cx", function(d) { return graphx(d.currentCount); })
+			.attr("cy", function(d) { return graphy(d.gender); })
+			.attr("r", "4")
+			.style("fill", "#69b3a2") // Can I replace this with a turtle + the count?
+			.attr("stroke", "black");
+
+};
+
+parser = new DOMParser();
+xmlDoc = parser.parseFromString(theXML, "text/xml");
+
+document.getElementById("theTitle").innerHTML = xmlDoc.getElementsByTagName("titlePart")[0].childNodes[0].nodeValue;
+displayPoem(xmlDoc);
+var theAuthor = xmlDoc.getElementsByTagName("author")[0].childNodes[0].nodeValue;
+var theSource = xmlDoc.getElementsByTagName("source")[0].childNodes[0].nodeValue;
+document.getElementById("theSource").innerHTML = "<div id='theAuthor'>" + theAuthor + "</div><div id='theSource'>" +  theSource + "</div>";
+</script>
+
+</body>
+</html>
